@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velora | Desarrollo de software</title>
+  <meta name="description" content="Velora: desarrollo de software a la medida, aplicaciones web y móviles para impulsar tu negocio.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%232F6BFF' d='M12 46H26L42 62L71 12H88V78A10 10 0 0 1 78 88H22A10 10 0 0 1 12 78Z'/%3E%3C/svg%3E">
+  <style>
+    /* ===== Colores de la marca (tomados del logo) ===== */
+    :root {
+      --navy: #0B1F3A;
+      --navy-2: #12294A;
+      --navy-3: #1A3560;
+      --blue: #2F6BFF;
+      --blue-light: #5A8BFF;
+      --blue-soft: #E8EFFF;
+      --white: #FFFFFF;
+      --gray-50: #F5F7FB;
+      --gray-500: #5B6B82;
+      --text: #0B1F3A;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(11, 31, 58, 0.10);
+      --max: 1120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== Barra de navegación ===== */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 50;
+      transition: background .3s, box-shadow .3s;
+    }
+    .nav.scrolled {
+      background: rgba(11, 31, 58, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+    }
+    .nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+    .brand svg { width: 34px; height: 34px; }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      color: rgba(255, 255, 255, .8);
+      font-weight: 500;
+      font-size: .95rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: 0;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      position: relative;
+    }
+    .menu-btn span {
+      position: absolute;
+      left: 10px;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: transform .3s, opacity .3s, top .3s;
+    }
+    .menu-btn span:nth-child(1) { top: 15px; }
+    .menu-btn span:nth-child(2) { top: 21px; }
+    .menu-btn span:nth-child(3) { top: 27px; }
+    .menu-btn[aria-expanded="true"] span:nth-child(1) { top: 21px; transform: rotate(45deg); }
+    .menu-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] span:nth-child(3) { top: 21px; transform: rotate(-45deg); }
+
+    /* ===== Botones ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 26px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform .2s, background .2s, box-shadow .2s;
+      cursor: pointer;
+      border: 0;
+    }
+    .btn svg { width: 20px; height: 20px; }
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 8px 24px rgba(47, 107, 255, .35);
+    }
+    .btn-primary:hover {
+      background: var(--blue-light);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(47, 107, 255, .45);
+    }
+    .btn-ghost {
+      color: var(--white);
+      border: 1.5px solid rgba(255, 255, 255, .3);
+    }
+    .btn-ghost:hover { border-color: var(--white); transform: translateY(-2px); }
+
+    /* ===== Encabezado / Hero ===== */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--white);
+      padding: 150px 0 110px;
+    }
+    /* Bloques de color decorativos en lugar de fotos */
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 620px;
+      height: 620px;
+      right: -180px;
+      top: -200px;
+      background: radial-gradient(circle, rgba(47, 107, 255, .35), transparent 65%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, #000 30%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+      pointer-events: none;
+    }
+    .hero .container {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      align-items: center;
+      gap: 48px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(47, 107, 255, .15);
+      color: var(--blue-light);
+      font-size: .85rem;
+      font-weight: 600;
+      margin-bottom: 22px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+    .hero h1 span { color: var(--blue); }
+    .tagline {
+      font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+      color: rgba(255, 255, 255, .78);
+      max-width: 34ch;
+      margin-bottom: 36px;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+
+    /* Ilustración hecha con bloques (ventana de código) */
+    .hero-art { position: relative; }
+    .window {
+      background: var(--navy-2);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, .35);
+    }
+    .window-dots { display: flex; gap: 8px; margin-bottom: 22px; }
+    .window-dots i {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .15);
+    }
+    .window-dots i:first-child { background: var(--blue); }
+    .code-line {
+      height: 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .12);
+      margin-bottom: 14px;
+    }
+    .code-line.blue { background: var(--blue); }
+    .code-line.soft { background: rgba(47, 107, 255, .45); }
+    .w-90 { width: 90%; } .w-75 { width: 75%; } .w-60 { width: 60%; }
+    .w-45 { width: 45%; } .w-30 { width: 30%; }
+    .indent { margin-left: 28px; }
+    .window-blocks {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .window-blocks div {
+      height: 64px;
+      border-radius: 12px;
+      background: var(--navy-3);
+    }
+    .window-blocks div:nth-child(2) { background: var(--blue); }
+    .floating-badge {
+      position: absolute;
+      left: -28px;
+      bottom: -26px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      color: var(--navy);
+      padding: 14px 18px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      font-weight: 600;
+      font-size: .9rem;
+      animation: float 4s ease-in-out infinite;
+    }
+    .floating-badge .check {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: var(--white);
+    }
+    .floating-badge .check svg { width: 18px; height: 18px; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ===== Secciones generales ===== */
+    section { padding: 100px 0; }
+    .section-label {
+      color: var(--blue);
+      font-weight: 700;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.9rem, 4vw, 2.7rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    /* ===== Sobre la empresa ===== */
+    .about .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .about p {
+      color: var(--gray-500);
+      font-size: 1.1rem;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .stat {
+      padding: 28px 24px;
+      border-radius: var(--radius);
+      background: var(--gray-50);
+    }
+    .stat:nth-child(1) { background: var(--navy); color: var(--white); }
+    .stat:nth-child(4) { background: var(--blue); color: var(--white); }
+    .stat strong {
+      display: block;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+    .stat span { font-size: .95rem; opacity: .8; }
+
+    /* ===== Servicios (tarjetas) ===== */
+    .services { background: var(--gray-50); }
+    .services-head { text-align: center; max-width: 620px; margin: 0 auto 56px; }
+    .services-head p { color: var(--gray-500); font-size: 1.05rem; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(11, 31, 58, .16);
+    }
+    .card-top {
+      height: 150px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:nth-child(1) .card-top { background: var(--navy); }
+    .card:nth-child(2) .card-top { background: var(--blue); }
+    .card:nth-child(3) .card-top { background: var(--navy-3); }
+    .card-top::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      right: -50px;
+      bottom: -70px;
+      background: rgba(255, 255, 255, .08);
+    }
+    .card-top svg {
+      width: 60px;
+      height: 60px;
+      color: var(--white);
+      position: relative;
+      z-index: 1;
+    }
+    .card-body { padding: 28px 26px 30px; flex: 1; display: flex; flex-direction: column; }
+    .card h3 { font-size: 1.3rem; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .card p { color: var(--gray-500); margin-bottom: 20px; flex: 1; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tags span {
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    /* ===== Contacto ===== */
+    .contact-box {
+      position: relative;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 28px;
+      padding: 72px 48px;
+      text-align: center;
+    }
+    .contact-box::before,
+    .contact-box::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .contact-box::before {
+      width: 300px; height: 300px;
+      left: -100px; top: -120px;
+      background: rgba(47, 107, 255, .25);
+    }
+    .contact-box::after {
+      width: 220px; height: 220px;
+      right: -60px; bottom: -90px;
+      background: rgba(47, 107, 255, .4);
+    }
+    .contact-box > * { position: relative; z-index: 1; }
+    .contact-box .section-label { color: var(--blue-light); }
+    .contact-box p {
+      color: rgba(255, 255, 255, .75);
+      max-width: 520px;
+      margin: 0 auto 34px;
+      font-size: 1.1rem;
+    }
+    .contact-mail {
+      display: block;
+      margin-top: 18px;
+      font-size: .9rem;
+      color: rgba(255, 255, 255, .55);
+    }
+
+    /* ===== Pie de página ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255, 255, 255, .7);
+      padding: 56px 0 32px;
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, .1);
+    }
+    .footer-top p { margin-top: 8px; font-size: .95rem; }
+    .socials { display: flex; gap: 12px; }
+    .socials a {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .08);
+      color: var(--white);
+      transition: background .2s, transform .2s;
+    }
+    .socials a:hover { background: var(--blue); transform: translateY(-3px); }
+    .socials svg { width: 20px; height: 20px; }
+    .footer-bottom {
+      padding-top: 24px;
+      font-size: .875rem;
+      text-align: center;
+    }
+
+    /* ===== Animación al hacer scroll ===== */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .floating-badge { animation: none; }
+    }
+
+    /* ===== Tablet ===== */
+    @media (max-width: 900px) {
+      .hero .container,
+      .about .container { grid-template-columns: 1fr; }
+      .hero-art { max-width: 460px; }
+      .about .container { gap: 40px; }
+      .cards { grid-template-columns: 1fr 1fr; }
+      .cards .card:last-child { grid-column: 1 / -1; }
+    }
+
+    /* ===== Celular ===== */
+    @media (max-width: 680px) {
+      .menu-btn { display: block; }
+      .nav-links {
+        position: absolute;
+        top: 72px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        background: var(--navy);
+        padding: 8px 20px 20px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, .25);
+        display: none;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li { width: 100%; }
+      .nav-links a { display: block; padding: 14px 0; font-size: 1.05rem; }
+      .nav-links .btn { justify-content: center; margin-top: 8px; }
+      .nav.menu-open { background: var(--navy); }
+
+      .hero { padding: 120px 0 90px; }
+      .hero-actions .btn { flex: 1 1 100%; justify-content: center; }
+      .floating-badge { left: 12px; bottom: -22px; }
+
+      section { padding: 72px 0; }
+      .cards { grid-template-columns: 1fr; }
+      .cards .card:last-child { grid-column: auto; }
+      .contact-box { padding: 56px 24px; border-radius: 22px; }
+      .contact-box .btn { width: 100%; justify-content: center; }
+      .footer-top { flex-direction: column; text-align: center; }
+      .footer-top .brand { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación -->
+  <nav class="nav" id="nav" aria-label="Principal">
+    <div class="container">
+      <a href="#inicio" class="brand" aria-label="Velora, ir al inicio">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <defs>
+            <clipPath id="nav-cl"><polygon points="0,0 42,0 42,62 100,62 100,100 0,100"/></clipPath>
+            <clipPath id="nav-cr"><polygon points="42,0 100,0 100,59 42,59"/></clipPath>
+          </defs>
+          <path clip-path="url(#nav-cl)" fill="#FFFFFF" d="M12 46H26L42 62L71 12H88V78A10 10 0 0 1 78 88H22A10 10 0 0 1 12 78Z"/>
+          <path clip-path="url(#nav-cr)" fill="#2F6BFF" d="M12 46H26L42 62L71 12H88V78A10 10 0 0 1 78 88H22A10 10 0 0 1 12 78Z"/>
+        </svg>
+        velora
+      </a>
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#contacto" class="btn btn-primary">Contáctanos</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Encabezado -->
+  <header class="hero" id="inicio">
+    <div class="container">
+      <div>
+        <span class="eyebrow">Desarrollo de software</span>
+        <h1>Velora<span>.</span></h1>
+        <p class="tagline">Convertimos tus ideas en software que impulsa tu negocio.</p>
+        <div class="hero-actions">
+          <a href="#servicios" class="btn btn-primary">
+            Ver servicios
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="#nosotros" class="btn btn-ghost">Conócenos</a>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="window">
+          <div class="window-dots"><i></i><i></i><i></i></div>
+          <div class="code-line blue w-45"></div>
+          <div class="code-line w-75 indent"></div>
+          <div class="code-line soft w-60 indent"></div>
+          <div class="code-line w-90 indent"></div>
+          <div class="code-line w-30"></div>
+          <div class="window-blocks"><div></div><div></div><div></div></div>
+        </div>
+        <div class="floating-badge">
+          <span class="check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+          </span>
+          Proyecto entregado a tiempo
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Sobre la empresa -->
+    <section class="about" id="nosotros">
+      <div class="container">
+        <div class="reveal">
+          <p class="section-label">Sobre la empresa</p>
+          <h2 class="section-title">Tecnología hecha a la medida de cada cliente</h2>
+          <p>
+            En Velora somos un equipo de desarrolladores, diseñadores y especialistas en la nube
+            que ayuda a empresas y emprendedores a crecer con tecnología. Escuchamos tus necesidades,
+            diseñamos la solución adecuada y la construimos con código limpio, seguro y escalable.
+            Trabajamos de cerca contigo en cada etapa, desde la primera idea hasta el lanzamiento
+            y el soporte continuo, para que tu software evolucione al mismo ritmo que tu negocio.
+          </p>
+        </div>
+        <div class="stats reveal">
+          <div class="stat"><strong>+50</strong><span>Proyectos entregados</span></div>
+          <div class="stat"><strong>98%</strong><span>Clientes satisfechos</span></div>
+          <div class="stat"><strong>24/7</strong><span>Soporte técnico</span></div>
+          <div class="stat"><strong>+5</strong><span>Años de experiencia</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Servicios -->
+    <section class="services" id="servicios">
+      <div class="container">
+        <div class="services-head reveal">
+          <p class="section-label">Servicios</p>
+          <h2 class="section-title">¿Qué podemos construir juntos?</h2>
+          <p>Soluciones completas para llevar tu proyecto del papel a producción.</p>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <div class="card-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="14" rx="2"/>
+                <path d="M2 8h20M8 21h8M12 18v3"/>
+                <path d="M9 11l-2 2 2 2M15 11l2 2-2 2"/>
+              </svg>
+            </div>
+            <div class="card-body">
+              <h3>Desarrollo web</h3>
+              <p>Sitios y plataformas web rápidas, seguras y fáciles de usar, adaptadas a cualquier dispositivo.</p>
+              <div class="tags"><span>Sitios web</span><span>E-commerce</span><span>Portales</span></div>
+            </div>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="6" y="2" width="12" height="20" rx="2.5"/>
+                <path d="M11 18h2"/>
+                <path d="M9 7h6M9 10h4"/>
+              </svg>
+            </div>
+            <div class="card-body">
+              <h3>Aplicaciones móviles</h3>
+              <p>Apps para Android e iOS con una experiencia fluida que tus usuarios disfrutarán usar todos los días.</p>
+              <div class="tags"><span>Android</span><span>iOS</span><span>Multiplataforma</span></div>
+            </div>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9H7z"/>
+                <path d="M12 12v5M9.5 14.5L12 12l2.5 2.5"/>
+              </svg>
+            </div>
+            <div class="card-body">
+              <h3>Software a la medida y nube</h3>
+              <p>Sistemas internos, automatización de procesos e infraestructura en la nube que crece contigo.</p>
+              <div class="tags"><span>ERP / CRM</span><span>APIs</span><span>Cloud</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contacto">
+      <div class="container">
+        <div class="contact-box reveal">
+          <p class="section-label">Contacto</p>
+          <h2 class="section-title">¿Tienes un proyecto en mente?</h2>
+          <p>Cuéntanos tu idea y te responderemos con una propuesta sin compromiso.</p>
+          <a class="btn btn-primary" href="mailto:jl625055@gmail.com?subject=Contacto%20desde%20la%20web%20de%20Velora">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2"/>
+              <path d="M3 7l9 6 9-6"/>
+            </svg>
+            Escríbenos un correo
+          </a>
+          <span class="contact-mail">jl625055@gmail.com</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Pie de página -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="#inicio" class="brand" aria-label="Velora, ir al inicio">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <clipPath id="ft-cl"><polygon points="0,0 42,0 42,62 100,62 100,100 0,100"/></clipPath>
+                <clipPath id="ft-cr"><polygon points="42,0 100,0 100,59 42,59"/></clipPath>
+              </defs>
+              <path clip-path="url(#ft-cl)" fill="#FFFFFF" d="M12 46H26L42 62L71 12H88V78A10 10 0 0 1 78 88H22A10 10 0 0 1 12 78Z"/>
+              <path clip-path="url(#ft-cr)" fill="#2F6BFF" d="M12 46H26L42 62L71 12H88V78A10 10 0 0 1 78 88H22A10 10 0 0 1 12 78Z"/>
+            </svg>
+            velora
+          </a>
+          <p>Software que impulsa tu negocio.</p>
+        </div>
+
+        <nav class="socials" aria-label="Redes sociales">
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3V9.5zm6.5 0h3.8v1.6h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.2c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4V9.5z"/></svg>
+          </a>
+          <a href="https://github.com/" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3zm-1.08 16.2h1.7L7.4 4.7H5.58l11.09 14.5z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.5l.4-3h-2.9V8.6c0-.87.25-1.46 1.5-1.46h1.6V4.46A21 21 0 0 0 14.27 4.3c-2.3 0-3.87 1.4-3.87 3.97v2.23H7.8v3h2.6V21h3.1z"/></svg>
+          </a>
+        </nav>
+      </div>
+      <p class="footer-bottom">© <span id="year"></span> Velora. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Año actual en el pie de página
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Fondo de la barra al hacer scroll
+    const nav = document.getElementById('nav');
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Menú en celulares
+    const menuBtn = document.getElementById('menuBtn');
+    const navLinks = document.getElementById('navLinks');
+    const setMenu = (open) => {
+      navLinks.classList.toggle('open', open);
+      nav.classList.toggle('menu-open', open);
+      menuBtn.setAttribute('aria-expanded', open);
+      menuBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    };
+    menuBtn.addEventListener('click', () => setMenu(!navLinks.classList.contains('open')));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+
+    // Aparición suave de las secciones
+    const items = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      items.forEach(el => io.observe(el));
+    } else {
+      items.forEach(el => el.classList.add('visible'));
+    }
+  </script>
+</body>
+</html>
